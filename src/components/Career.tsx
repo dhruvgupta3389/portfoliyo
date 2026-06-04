@@ -15,17 +15,18 @@ const Career = () => {
           <div className="career-info-box">
             <div className="career-info-in">
               <div className="career-role">
-                <h4>Student Ambassador</h4>
+                <h4>Tech & PR Team Head</h4>
                 <h5>Microsoft · MLSA</h5>
               </div>
-              <h3>NOW</h3>
+              <h3>2023–24</h3>
             </div>
             <p>
-              Microsoft Learn Student Ambassador (2023–Present). Led 2+ technical
-              workshops on full-stack dev and applied AI, reaching 20+ developers
-              across campus and partner institutions. Mentored 5+ engineers through
-              end-to-end project lifecycles. Organized 2+ hackathons and managed a
-              100+ member MLSA chapter under AKTU network.
+              Tech Team Head and PR Team Head at the Microsoft Learn Student
+              Ambassadors chapter (2023–2024). Led 2+ technical workshops on
+              full-stack dev and applied AI, reaching 20+ developers across campus
+              and partner institutions. Mentored 5+ engineers, organized 2+
+              hackathons, and helped run a 100+ member MLSA chapter under the AKTU
+              network.
             </p>
           </div>
           <div className="career-info-box">
@@ -50,7 +51,7 @@ const Career = () => {
                 <h4>B.Tech CSE</h4>
                 <h5>MIET · AKTU</h5>
               </div>
-              <h3>2022–</h3>
+              <h3>2022–26</h3>
             </div>
             <p>
               Computer Science & Engineering with AI Specialization at Meerut
