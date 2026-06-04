@@ -49,7 +49,6 @@ function eyeCenter(character: THREE.Object3D): THREE.Vector3 | null {
 }
 
 export function addGlasses(character: THREE.Object3D) {
-  (window as any).__char = character;
   const head = character.getObjectByName("spine006");
   if (!head) {
     console.warn("[glasses] head bone spine006 not found");
@@ -107,23 +106,25 @@ export function addGlasses(character: THREE.Object3D) {
   let group = build();
   head.attach(group); // becomes head's child, keeps world transform → tracks head
 
-  // ── Dev calibration hooks ────────────────────────────────────────────────
-  (window as any).__glassesTune = (patch: Partial<typeof TUNE>) => {
-    Object.assign(TUNE, patch);
-    const old = head.getObjectByName("Glasses");
-    if (old) head.remove(old);
-    group = build();
-    head.attach(group);
-    return { ...TUNE };
-  };
-  (window as any).__glassesInfo = () => {
-    character.updateWorldMatrix(true, true);
-    const g = head.getObjectByName("Glasses");
-    const lw = g?.children[0].getWorldPosition(new THREE.Vector3());
-    return {
-      eyeCenter: eye.toArray().map((n) => +n.toFixed(3)),
-      lensWorld: lw?.toArray().map((n) => +n.toFixed(3)),
-      tune: { ...TUNE },
+  // ── Dev-only calibration hooks (stripped from production builds) ──────────
+  if (import.meta.env.DEV) {
+    (window as any).__glassesTune = (patch: Partial<typeof TUNE>) => {
+      Object.assign(TUNE, patch);
+      const old = head.getObjectByName("Glasses");
+      if (old) head.remove(old);
+      group = build();
+      head.attach(group);
+      return { ...TUNE };
     };
-  };
+    (window as any).__glassesInfo = () => {
+      character.updateWorldMatrix(true, true);
+      const g = head.getObjectByName("Glasses");
+      const lw = g?.children[0].getWorldPosition(new THREE.Vector3());
+      return {
+        eyeCenter: eye.toArray().map((n) => +n.toFixed(3)),
+        lensWorld: lw?.toArray().map((n) => +n.toFixed(3)),
+        tune: { ...TUNE },
+      };
+    };
+  }
 }
