@@ -258,6 +258,11 @@
   line-height: 28px;
   font-weight: 500;
   font-family: "Geist", sans-serif;
+  text-shadow: 0 0 34px rgba(167, 139, 250, 0.35);
+}
+
+.landing-intro h1 span {
+  color: var(--accentColor);
 }
 
 /* .landing-intro h1 span {

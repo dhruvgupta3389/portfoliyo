@@ -19,9 +19,21 @@
   -webkit-user-select: none;
   -moz-user-select: none;
   --accentColor: #a78bfa;
+  --accent2: #818cf8;
+  --accent3: #38bdf8;
+  --gradient: linear-gradient(120deg, #c4b5fd 0%, #a78bfa 32%, #818cf8 66%, #38bdf8 100%);
   --backgroundColor: #0a0e17;
   --vh: 100vh;
   --vh: 100svh;
+}
+
+/* Reusable gradient text utility */
+.grad-text {
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
 }
 
 h1,

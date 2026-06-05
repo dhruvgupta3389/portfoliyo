@@ -44,6 +44,11 @@
   font-weight: 700;
   font-size: 14px;
   letter-spacing: 0.2px;
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
 }
 @media only screen and (min-width: 500px) {
   .header {

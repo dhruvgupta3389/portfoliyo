@@ -66,6 +66,11 @@
   font-size: 35px;
   letter-spacing: 1px;
   margin: 0;
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
 }
 .what-content p {
   font-size: 14px;
@@ -234,10 +239,19 @@
 .what-tags {
   font-size: 13px;
   font-weight: 400;
-  padding: 2px 7px;
-  background-color: rgba(255, 255, 255, 0.15);
-  border: 1px solid #ffffff50;
+  padding: 3px 10px;
+  color: #d8ccff;
+  background-color: rgba(167, 139, 250, 0.1);
+  border: 1px solid rgba(167, 139, 250, 0.35);
   border-radius: 30px;
+  transition: background-color 0.3s ease, border-color 0.3s ease,
+    box-shadow 0.3s ease, color 0.3s ease;
+}
+.what-tags:hover {
+  color: #ffffff;
+  background-color: rgba(167, 139, 250, 0.2);
+  border-color: var(--accentColor);
+  box-shadow: 0 0 14px rgba(167, 139, 250, 0.35);
 }
 @media only screen and (max-width: 1600px) {
   .what-box h2 {
