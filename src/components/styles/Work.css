@@ -27,6 +27,73 @@
   margin: auto;
 }
 
+/* ── Project badge ── */
+.carousel-title-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.work-badge {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 30px;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.work-badge-live {
+  color: #d8ccff;
+  background-color: rgba(167, 139, 250, 0.15);
+  border: 1px solid rgba(167, 139, 250, 0.45);
+  box-shadow: 0 0 12px rgba(167, 139, 250, 0.2);
+}
+
+.work-badge-private {
+  color: rgba(255, 255, 255, 0.6);
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* ── Slideshow ── */
+.work-slide-img {
+  animation: workSlideFade 0.6s ease;
+}
+@keyframes workSlideFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.work-slideshow-dots {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 7px;
+  z-index: 3;
+  pointer-events: none;
+}
+.work-slideshow-dots span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.4);
+  transition: 0.3s;
+}
+.work-slideshow-dots span.active {
+  background-color: var(--accentColor);
+  width: 20px;
+  border-radius: 4px;
+}
+
 /* ── Carousel ── */
 .carousel-wrapper {
   position: relative;
@@ -48,9 +115,12 @@
 
 .carousel-slide {
   min-width: 100%;
+  max-width: 100%;
+  width: 100%;
   flex-shrink: 0;
   box-sizing: border-box;
   padding: 50px 0;
+  overflow: hidden;
 }
 
 .carousel-content {
@@ -62,6 +132,7 @@
 
 .carousel-info {
   flex: 1;
+  min-width: 0;
   display: flex;
   gap: 30px;
   align-items: flex-start;
@@ -115,6 +186,7 @@
 
 .carousel-image-wrapper {
   flex: 1;
+  min-width: 0;
   display: flex;
   justify-content: center;
   align-items: center;

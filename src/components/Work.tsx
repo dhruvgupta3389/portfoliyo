@@ -3,34 +3,91 @@ import "./styles/Work.css";
 import WorkImage from "./WorkImage";
 import { MdArrowBack, MdArrowForward } from "react-icons/md";
 
-const projects = [
+type Project = {
+  title: string;
+  category: string;
+  tools: string;
+  image: string;
+  link: string;
+  badge: "Live" | "Private";
+  images?: string[];
+};
+
+const projects: Project[] = [
   {
     title: "Military Offline Mapping",
     category: "Defense Offline-First Platform",
-    tools: "Python · FastAPI · Leaflet.js · WebSockets · SQLite",
-    image: "/images/placeholder.webp",
-    link: "#",
+    tools: "Python · FastAPI · Leaflet.js · WebSockets · SQLite · LoRa",
+    image: "/images/proj-offline-1.jpg",
+    images: [
+      "/images/proj-offline-1.jpg",
+      "/images/proj-offline-2.jpg",
+      "/images/proj-offline-3.jpg",
+    ],
+    link: "https://github.com/dhruvgupta3389/offline_map",
+    badge: "Private",
+  },
+  {
+    title: "AI Answer Sheet Evaluator",
+    category: "OCR + NLP Grading System · Final Year Project",
+    tools: "Python · OpenCV · Tesseract OCR · FastAPI · React.js",
+    image: "/images/proj-answersheet-1.png",
+    images: [
+      "/images/proj-answersheet-1.png",
+      "/images/proj-answersheet-2.png",
+      "/images/proj-answersheet-3.png",
+      "/images/proj-answersheet-4.png",
+    ],
+    link: "https://github.com/dhruvgupta3389/final_year_project",
+    badge: "Private",
+  },
+  {
+    title: "MIT Meerut Website",
+    category: "College Institutional Website",
+    tools: "Web · CMS · Responsive UI",
+    image: "/images/proj-mitmeerut.png",
+    link: "http://mitmeerut.ac.in/",
+    badge: "Live",
+  },
+  {
+    title: "SH Essentials",
+    category: "Sustainable-Fashion E-commerce",
+    tools: "React · E-commerce · Payments · Vercel",
+    image: "/images/proj-shessentials.png",
+    link: "https://www.shessentials.in/",
+    badge: "Live",
+  },
+  {
+    title: "MIT QR Registrar",
+    category: "Campus Visitor Registration Portal",
+    tools: "React · QR · Google Auth · Vercel",
+    image: "/images/proj-mitqr.png",
+    link: "https://mit-qr-registrar.vercel.app/qr/register",
+    badge: "Live",
+  },
+  {
+    title: "Drivya.AI",
+    category: "AI B2B Partner-Matching Platform",
+    tools: "React · AI Matching · Compatibility Scoring · Vercel",
+    image: "/images/proj-drivyaai.png",
+    link: "https://drivyaai.vercel.app/",
+    badge: "Live",
+  },
+  {
+    title: "Shubharkar",
+    category: "Student Management System",
+    tools: "React · Dashboard · Student Records · Attendance",
+    image: "/images/proj-shubharkar.png",
+    link: "https://shubharkar.vercel.app/",
+    badge: "Live",
   },
   {
     title: "AI Vulnerability Scanner",
     category: "AI-Based Security Platform",
     tools: "Python · FastAPI · OpenAI API · React.js · MongoDB · Docker",
     image: "/images/placeholder.webp",
-    link: "#",
-  },
-  {
-    title: "AI Answer Sheet Evaluator",
-    category: "OCR + NLP Grading System",
-    tools: "Python · OpenCV · Tesseract OCR · FastAPI · React.js",
-    image: "/images/placeholder.webp",
-    link: "#",
-  },
-  {
-    title: "Freelance Full-Stack",
-    category: "3 Production Client Apps",
-    tools: "React.js · Node.js · Firebase · MongoDB · Tailwind CSS · Vercel",
-    image: "/images/placeholder.webp",
-    link: "#",
+    link: "https://github.com/dhruvgupta3389/scaner",
+    badge: "Private",
   },
 ];
 
@@ -102,7 +159,16 @@ const Work = () => {
                         <h3>0{index + 1}</h3>
                       </div>
                       <div className="carousel-details">
-                        <h4>{project.title}</h4>
+                        <div className="carousel-title-row">
+                          <h4>{project.title}</h4>
+                          <span
+                            className={`work-badge work-badge-${project.badge.toLowerCase()}`}
+                          >
+                            {project.badge === "Private"
+                              ? "Private · request access"
+                              : "Live"}
+                          </span>
+                        </div>
                         <p className="carousel-category">
                           {project.category}
                         </p>
@@ -115,6 +181,7 @@ const Work = () => {
                     <div className="carousel-image-wrapper">
                       <WorkImage
                         image={project.image}
+                        images={project.images}
                         alt={project.title}
                         link={project.link}
                       />

@@ -30,4 +30,17 @@
   .cursor-disable {
     --size: 0px;
   }
+  /* Hide the default OS pointer; the custom orb replaces it */
+  html,
+  body,
+  * {
+    cursor: none;
+  }
+  /* Restore a normal pointer on interactive elements (where the orb shrinks away) */
+  a,
+  button,
+  [data-cursor="disable"],
+  [data-cursor="disable"] * {
+    cursor: pointer;
+  }
 }
