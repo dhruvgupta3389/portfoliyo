@@ -77,13 +77,23 @@ export function addGlasses(character: THREE.Object3D) {
     const cL = new THREE.Vector3(TUNE.lensX, cy, cz);
     const cR = new THREE.Vector3(-TUNE.lensX, cy, cz);
 
-    const lensGeo = new THREE.TorusGeometry(TUNE.lensRadius, TUNE.lensTube, 12, 30);
+    // Square lens frames: four bars per lens, built in a local XY plane then
+    // tilted by `pitch`. Half-width = lensRadius; half-height uses lensSquash.
+    const hw = TUNE.lensRadius;
+    const hh = TUNE.lensRadius * TUNE.lensSquash;
     [cL, cR].forEach((c) => {
-      const lens = new THREE.Mesh(lensGeo, mat); // torus hole-axis = +Z (faces front)
+      const lens = new THREE.Group();
+      const corners = [
+        new THREE.Vector3(-hw, hh, 0),
+        new THREE.Vector3(hw, hh, 0),
+        new THREE.Vector3(hw, -hh, 0),
+        new THREE.Vector3(-hw, -hh, 0),
+      ];
+      for (let i = 0; i < 4; i++) {
+        lens.add(cyl(corners[i], corners[(i + 1) % 4], TUNE.lensTube, mat));
+      }
       lens.position.copy(c);
       lens.rotation.x = TUNE.pitch;
-      lens.scale.y = TUNE.lensSquash;
-      lens.castShadow = true;
       group.add(lens);
     });
 

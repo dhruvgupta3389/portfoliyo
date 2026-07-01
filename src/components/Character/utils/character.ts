@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { DRACOLoader, GLTF, GLTFLoader } from "three-stdlib";
 import { setCharTimeline, setAllTimeline } from "../../utils/GsapScroll";
 import { addGlasses } from "./glasses";
+import { addHeadphones } from "./headphones";
 
 const setCharacter = (
   renderer: THREE.WebGLRenderer,
@@ -22,21 +23,29 @@ const setCharacter = (
           async (gltf) => {
             character = gltf.scene;
             await renderer.compileAsync(character, camera, scene);
+            // Recolor named parts to define a custom character. Appearance is
+            // independent of animation — the clips ride on the skeleton — so
+            // these changes give a distinctly different person, same desk + motion.
+            const SKIN = "#c68e5d"; // warm medium (Indian) skin tone
+            const colorByMesh: Record<string, string> = {
+              "BODY.SHIRT": "#7c6cf0", // violet shirt — matches site --accentColor
+              "Pant": "#0a0e17",       // dark navy — matches site background
+              "Hair": "#1a1a1a",       // black hair
+              "Face.002": SKIN,        // face
+              "Hand": SKIN,            // hands
+              "Neck": SKIN,            // neck
+              "Ear.001": SKIN,         // ears
+            };
+
             character.traverse((child: any) => {
               if (child.isMesh) {
                 const mesh = child as THREE.Mesh;
 
-                // Change clothing colors to match site theme
-                if (mesh.material) {
-                  if (mesh.name === "BODY.SHIRT") { // The shirt mesh
-                    const newMat = (mesh.material as THREE.Material).clone() as THREE.MeshStandardMaterial;
-                    newMat.color = new THREE.Color("#8B4513");
-                    mesh.material = newMat;
-                  } else if (mesh.name === "Pant") {
-                    const newMat = (mesh.material as THREE.Material).clone() as THREE.MeshStandardMaterial;
-                    newMat.color = new THREE.Color("#000000");
-                    mesh.material = newMat;
-                  }
+                const hex = colorByMesh[mesh.name];
+                if (mesh.material && hex) {
+                  const newMat = (mesh.material as THREE.Material).clone() as THREE.MeshStandardMaterial;
+                  newMat.color = new THREE.Color(hex);
+                  mesh.material = newMat;
                 }
 
                 child.castShadow = true;
@@ -48,6 +57,7 @@ const setCharacter = (
             // Build glasses in code and attach to the head bone so they
             // track the face through all animations / mouse head-rotation.
             addGlasses(character);
+            addHeadphones(character);
 
             resolve(gltf);
             setCharTimeline(character, camera);

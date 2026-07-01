@@ -1,13 +1,27 @@
-import { MdArrowOutward, MdCopyright } from "react-icons/md";
+import { MdArrowOutward, MdCopyright, MdMail } from "react-icons/md";
 import "./styles/Contact.css";
 
 const Contact = () => {
   return (
     <div className="contact-section section-container" id="contact">
       <div className="contact-container">
-        <h3>Contact</h3>
-        <div className="contact-flex">
-          <div className="contact-box">
+        <div className="contact-header">
+          <h3>Contact</h3>
+          <p className="contact-cta">
+            Open to collaborations, freelance work, and full-time roles. Let's
+            build something great.
+          </p>
+          <a
+            href="mailto:dhruvgupta33899@gmail.com"
+            className="contact-email-btn"
+            data-cursor="disable"
+          >
+            <MdMail /> dhruvgupta33899@gmail.com
+          </a>
+        </div>
+
+        <div className="contact-cards">
+          <div className="contact-card">
             <h4>Connect</h4>
             <p>
               <a
@@ -21,11 +35,13 @@ const Contact = () => {
             </p>
             <h4>Education</h4>
             <p>
-              B.Tech — Computer Science & Engineering (AI Specialization),
-              Meerut Institute of Engineering & Technology (AKTU) — 2022–Present
+              B.Tech — Computer Science &amp; Engineering (AI Specialization),
+              Meerut Institute of Engineering &amp; Technology (AKTU) —
+              2022–2026
             </p>
           </div>
-          <div className="contact-box">
+
+          <div className="contact-card">
             <h4>Social</h4>
             <a
               href="https://github.com/dhruvgupta3389"
@@ -46,9 +62,10 @@ const Contact = () => {
               LinkedIn <MdArrowOutward />
             </a>
           </div>
-          <div className="contact-box">
+
+          <div className="contact-card contact-card-attribution">
             <h2>
-              Designed and Developed <br /> by <span>Dhruv Gupta</span>
+              Designed &amp; Developed <br /> by <span>Dhruv Gupta</span>
             </h2>
             <h5>
               <MdCopyright /> 2026

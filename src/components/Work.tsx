@@ -74,14 +74,6 @@ const projects: Project[] = [
     badge: "Live",
   },
   {
-    title: "Shubharkar",
-    category: "Student Management System",
-    tools: "React · Dashboard · Student Records · Attendance",
-    image: "/images/proj-shubharkar.png",
-    link: "https://shubharkar.vercel.app/",
-    badge: "Live",
-  },
-  {
     title: "AI Vulnerability Scanner",
     category: "AI-Based Security Platform",
     tools: "Python · FastAPI · OpenAI API · React.js · MongoDB · Docker",
