@@ -1,26 +1,27 @@
 import * as THREE from "three";
 
 /**
- * Builds over-ear headphones in code and rests them around the character's
- * NECK (band behind the neck, two earcups hanging at the front sides). They are
- * attached to the neck bone (spine005) — NOT the head bone — so they follow the
- * body through animations but do NOT swivel when the head tracks the mouse.
+ * Builds over-ear headphones in code resting around the character's NECK: a band
+ * that arcs around the BACK of the neck (above the shoulders) with two earcups
+ * resting on the collarbones at the front. Attached to the neck bone (spine005),
+ * NOT the head bone, so they follow the body but don't swivel with head-look.
  *
  * Y-up world space: Y = height, +Z = face front, X = left/right.
- * Placement is anchored to the measured Neck-mesh center (pose-robust).
+ * Placement is anchored to the measured Neck-mesh centre (pose-robust).
  * Tunables exposed via window.__headphonesTune for live dev calibration.
  */
 
 const TUNE = {
-  radius: 0.62,   // band radius around the neck
-  tube: 0.055,    // band thickness
-  dy: -0.05,      // vertical nudge from neck center (+ up)
-  dz: 0.0,        // forward nudge from neck center
-  gap: 0.9,       // front opening (radians) where the two cups hang
-  cupR: 0.26,     // earcup radius
-  cupDepth: 0.13, // earcup thickness
-  cupDrop: 0.16,  // how far the cups hang below the band
-  cupOut: 0.04,   // extra outward push for the cups
+  radius: 0.5,    // band radius around the neck (neck is ~±0.44 wide)
+  tube: 0.05,     // band thickness
+  dy: 0.22,       // raise the band to the neck base, ABOVE the shoulders
+  dz: 0.0,        // forward nudge from neck centre
+  gap: 0.95,      // front opening (radians) where the band ends sit
+  cupR: 0.32,     // earcup radius (bigger, reads as real headphones)
+  cupDepth: 0.16, // earcup thickness
+  collarX: 0.58,  // half-distance between the two cups (rest on the collarbones)
+  collarDrop: 0.5,// how far below the band the cups sit
+  collarFwd: 0.95,// forward offset of the cups from the neck centre (onto the chest)
   seg: 26,        // band smoothness
 };
 
@@ -97,8 +98,8 @@ export function addHeadphones(character: THREE.Object3D) {
       );
 
     // Sweep the band around the BACK, leaving `gap` open at the front (+Z).
-    const start = Math.PI / 2 + TUNE.gap / 2; // front-left edge of gap
-    const end = Math.PI / 2 - TUNE.gap / 2 + Math.PI * 2; // wrap around the back
+    const start = Math.PI / 2 + TUNE.gap / 2;
+    const end = Math.PI / 2 - TUNE.gap / 2 + Math.PI * 2;
     let prev = bandPt(start);
     for (let i = 1; i <= TUNE.seg; i++) {
       const a = start + ((end - start) * i) / TUNE.seg;
@@ -107,41 +108,37 @@ export function addHeadphones(character: THREE.Object3D) {
       prev = p;
     }
 
-    // Two earcups hang at the front ends of the band (front-left / front-right).
+    // Two earcups rest on the collarbones; each connects up to its band end.
+    const forward = new THREE.Vector3(0, 0, 1);
     [start, end].forEach((a) => {
-      const anchorPt = bandPt(a);
-      const outward = new THREE.Vector3(Math.cos(a), 0, Math.sin(a)).normalize();
-      const cupPos = anchorPt
-        .clone()
-        .add(outward.clone().multiplyScalar(TUNE.cupOut));
-      cupPos.y -= TUNE.cupDrop;
+      const bandEnd = bandPt(a);
+      const sx = Math.sign(bandEnd.x) || 1;
+      const cupPos = new THREE.Vector3(
+        sx * TUNE.collarX,
+        cy - TUNE.collarDrop,
+        cz + TUNE.collarFwd
+      );
 
-      // Shell: a short cylinder whose flat faces point outward (radially).
+      // Shell: a short cylinder whose flat faces point forward (toward viewer).
       const shell = new THREE.Mesh(
-        new THREE.CylinderGeometry(TUNE.cupR, TUNE.cupR, TUNE.cupDepth, 20),
+        new THREE.CylinderGeometry(TUNE.cupR, TUNE.cupR, TUNE.cupDepth, 24),
         cupMat
       );
       shell.position.copy(cupPos);
-      shell.quaternion.setFromUnitVectors(
-        new THREE.Vector3(0, 1, 0),
-        outward
-      );
+      shell.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), forward);
       shell.castShadow = true;
       group.add(shell);
 
-      // Violet accent ring on the outer face.
+      // Violet accent ring on the front face.
       const ring = new THREE.Mesh(
-        new THREE.TorusGeometry(TUNE.cupR * 0.6, TUNE.cupR * 0.12, 10, 24),
+        new THREE.TorusGeometry(TUNE.cupR * 0.62, TUNE.cupR * 0.12, 12, 28),
         accentMat
       );
-      ring.position
-        .copy(cupPos)
-        .add(outward.clone().multiplyScalar(TUNE.cupDepth * 0.55));
-      ring.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), outward);
+      ring.position.copy(cupPos).add(forward.clone().multiplyScalar(TUNE.cupDepth * 0.55));
       group.add(ring);
 
-      // Short arm connecting band end down to the cup.
-      group.add(cyl(anchorPt, cupPos, TUNE.tube * 0.8, bandMat));
+      // Arm connecting the band end down/forward to the cup.
+      group.add(cyl(bandEnd, cupPos, TUNE.tube * 0.9, bandMat));
     });
 
     return group;
@@ -158,6 +155,16 @@ export function addHeadphones(character: THREE.Object3D) {
       group = build();
       anchor.attach(group);
       return { ...TUNE };
+    };
+    (window as any).__headphonesInfo = () => {
+      const cy = neck.y + TUNE.dy, cz = neck.z + TUNE.dz;
+      return {
+        neckCenter: neck.toArray().map((n) => +n.toFixed(2)),
+        bandCenterY: +cy.toFixed(2),
+        bandBackZ: +(cz - TUNE.radius).toFixed(2),
+        cupPos: [TUNE.collarX, +(cy - TUNE.collarDrop).toFixed(2), +(cz + TUNE.collarFwd).toFixed(2)],
+        cupR: TUNE.cupR,
+      };
     };
   }
 }

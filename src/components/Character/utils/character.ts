@@ -41,6 +41,13 @@ const setCharacter = (
               if (child.isMesh) {
                 const mesh = child as THREE.Mesh;
 
+                // Swap the cap for hair: the model ships a Hair mesh hidden
+                // under CAP001/CAP002. Hide the caps and the hair shows through.
+                if (mesh.name.startsWith("CAP")) {
+                  mesh.visible = false;
+                  return;
+                }
+
                 const hex = colorByMesh[mesh.name];
                 if (mesh.material && hex) {
                   const newMat = (mesh.material as THREE.Material).clone() as THREE.MeshStandardMaterial;

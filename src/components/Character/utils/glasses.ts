@@ -4,23 +4,25 @@ import * as THREE from "three";
  * Builds glasses in code and attaches them to the head bone (spine006) so they
  * track the face through animations and mouse head-rotation.
  *
- * Placement is anchored to the measured EYE-mesh center (robust, pose-correct),
- * NOT the eyebrow bones (which sit ~0.4 above the eyes). three.js world space
- * here is Y-up: Y = height, Z = depth (face front = +Z), X = left/right.
+ * Placement is measured from the model itself (robust, pose-correct):
+ *  - eye mesh centre  → lens X/Y
+ *  - face front depth at eye height → lens sits IN FRONT of the face (no clip)
+ *  - ear centres      → temple arms route to the ears (not into the skull)
+ * three.js world space here is Y-up: Y = height, +Z = face front, X = left/right.
  *
  * Tunables are on TUNE and exposed via window.__glassesTune for live dev calibration.
  */
 
 const TUNE = {
-  lensX: 0.40,     // half-distance between the two lenses
-  dy: 0.02,        // vertical nudge from eye center (+ up)
-  dz: 0.23,        // forward nudge from eye center (clears the eyeball surface)
-  lensRadius: 0.30,
-  lensTube: 0.028,
-  lensSquash: 0.80, // vertical squash → oval lenses
-  pitch: 0.08,      // tilt about X (radians) to follow the face
-  templeLen: 0.85,  // reaches back to about the ears
-  templeOut: 0.22,
+  lensX: 0.36,       // half-distance between the two lenses
+  dy: 0.06,          // vertical nudge from eye centre (+ up)
+  frontClear: 0.12,  // how far the lens plane sits in front of the face surface
+  lensRadius: 0.23,  // smaller, less chunky lenses
+  lensTube: 0.022,   // slimmer frame
+  lensSquash: 0.82,  // vertical squash → oval-ish square lenses
+  pitch: 0.08,       // tilt about X (radians) to follow the face
+  earOut: 0.12,      // push the temple ends slightly past the ear centres
+  earDrop: 0.02,     // small vertical drop of the temple end
 };
 
 function cyl(a: THREE.Vector3, b: THREE.Vector3, r: number, mat: THREE.Material) {
@@ -33,19 +35,53 @@ function cyl(a: THREE.Vector3, b: THREE.Vector3, r: number, mat: THREE.Material)
   return m;
 }
 
-function eyeCenter(character: THREE.Object3D): THREE.Vector3 | null {
-  let center: THREE.Vector3 | null = null;
+function meshByName(character: THREE.Object3D, match: (n: string) => boolean) {
+  let found: THREE.Mesh | null = null;
   character.traverse((o: any) => {
-    if (center || !o.isMesh || !o.name) return;
-    const n = o.name.toLowerCase();
-    if (n.includes("eye") && !n.includes("eyebrow")) {
-      o.geometry.computeBoundingBox();
-      const bb = o.geometry.boundingBox.clone();
-      bb.applyMatrix4(o.matrixWorld);
-      center = bb.getCenter(new THREE.Vector3());
-    }
+    if (!found && o.isMesh && o.name && match(o.name.toLowerCase())) found = o;
   });
-  return center;
+  return found;
+}
+
+function eyeCenter(character: THREE.Object3D): THREE.Vector3 | null {
+  const eye = meshByName(
+    character,
+    (n) => n.includes("eye") && !n.includes("eyebrow")
+  );
+  if (!eye) return null;
+  eye.geometry.computeBoundingBox();
+  const bb = eye.geometry.boundingBox!.clone().applyMatrix4(eye.matrixWorld);
+  return bb.getCenter(new THREE.Vector3());
+}
+
+// Front-most Z of the face surface within a Y band around the eyes.
+function faceFrontZ(character: THREE.Object3D, y: number): number | null {
+  const face = meshByName(character, (n) => n.includes("face"));
+  if (!face) return null;
+  const pos = face.geometry.attributes.position as THREE.BufferAttribute;
+  const v = new THREE.Vector3();
+  let maxZ = -Infinity;
+  for (let i = 0; i < pos.count; i++) {
+    v.fromBufferAttribute(pos, i).applyMatrix4(face.matrixWorld);
+    if (v.y > y - 0.25 && v.y < y + 0.25 && v.z > maxZ) maxZ = v.z;
+  }
+  return maxZ === -Infinity ? null : maxZ;
+}
+
+// Per-ear world centroids (split by X sign).
+function earCenters(character: THREE.Object3D) {
+  const ear = meshByName(character, (n) => n.includes("ear") && !n.includes("eyebrow"));
+  if (!ear) return null;
+  const pos = ear.geometry.attributes.position as THREE.BufferAttribute;
+  const v = new THREE.Vector3();
+  const R = new THREE.Vector3(), L = new THREE.Vector3();
+  let rn = 0, ln = 0;
+  for (let i = 0; i < pos.count; i++) {
+    v.fromBufferAttribute(pos, i).applyMatrix4(ear.matrixWorld);
+    if (v.x >= 0) { R.add(v); rn++; } else { L.add(v); ln++; }
+  }
+  if (!rn || !ln) return null;
+  return { R: R.multiplyScalar(1 / rn), L: L.multiplyScalar(1 / ln) };
 }
 
 export function addGlasses(character: THREE.Object3D) {
@@ -61,6 +97,8 @@ export function addGlasses(character: THREE.Object3D) {
     console.warn("[glasses] eye mesh not found");
     return;
   }
+  const front = faceFrontZ(character, eye.y);
+  const ears = earCenters(character);
 
   const build = () => {
     const group = new THREE.Group();
@@ -71,9 +109,9 @@ export function addGlasses(character: THREE.Object3D) {
       roughness: 0.35,
     });
 
-    // Lens centers in world space, anchored to the eye center
     const cy = eye.y + TUNE.dy;
-    const cz = eye.z + TUNE.dz;
+    // Lens plane sits in front of the measured face surface (fallback: eye + 0.4).
+    const cz = (front ?? eye.z + 0.28) + TUNE.frontClear;
     const cL = new THREE.Vector3(TUNE.lensX, cy, cz);
     const cR = new THREE.Vector3(-TUNE.lensX, cy, cz);
 
@@ -102,13 +140,20 @@ export function addGlasses(character: THREE.Object3D) {
     const bR = new THREE.Vector3(-TUNE.lensX + TUNE.lensRadius, cy, cz);
     group.add(cyl(bL, bR, TUNE.lensTube * 0.8, mat));
 
-    // Temple arms: outer edge → back (−Z) and outward (±X)
-    const oL = new THREE.Vector3(TUNE.lensX + TUNE.lensRadius, cy, cz);
-    const oR = new THREE.Vector3(-TUNE.lensX - TUNE.lensRadius, cy, cz);
-    const eL = new THREE.Vector3(oL.x + TUNE.templeOut, cy + 0.04, cz - TUNE.templeLen);
-    const eR = new THREE.Vector3(oR.x - TUNE.templeOut, cy + 0.04, cz - TUNE.templeLen);
-    group.add(cyl(oL, eL, TUNE.lensTube * 0.7, mat));
-    group.add(cyl(oR, eR, TUNE.lensTube * 0.7, mat));
+    // Temple arms: a 2-segment path per side — hinge (lens outer edge) → a point
+    // beside the head at the temple → the ear — so the arm hugs the head instead
+    // of poking out sideways.
+    const arm = (sign: number, ear: THREE.Vector3 | null) => {
+      const hinge = new THREE.Vector3(sign * (TUNE.lensX + TUNE.lensRadius), cy, cz);
+      const target = ear ?? new THREE.Vector3(sign * 1.25, cy - 0.1, cz - 0.9);
+      const endX = target.x + sign * TUNE.earOut;
+      const side = new THREE.Vector3(endX, cy, (cz + target.z) / 2); // temple, eye height
+      const end = new THREE.Vector3(endX, target.y - TUNE.earDrop, target.z);
+      group.add(cyl(hinge, side, TUNE.lensTube * 0.7, mat));
+      group.add(cyl(side, end, TUNE.lensTube * 0.7, mat));
+    };
+    arm(1, ears?.R ?? null);
+    arm(-1, ears?.L ?? null);
 
     return group;
   };
@@ -132,6 +177,8 @@ export function addGlasses(character: THREE.Object3D) {
       const lw = g?.children[0].getWorldPosition(new THREE.Vector3());
       return {
         eyeCenter: eye.toArray().map((n) => +n.toFixed(3)),
+        faceFrontZ: front,
+        ears: ears && { R: ears.R.toArray().map((n) => +n.toFixed(2)), L: ears.L.toArray().map((n) => +n.toFixed(2)) },
         lensWorld: lw?.toArray().map((n) => +n.toFixed(3)),
         tune: { ...TUNE },
       };
