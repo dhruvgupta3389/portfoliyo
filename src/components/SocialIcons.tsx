@@ -1,4 +1,4 @@
-import { FaGithub } from "react-icons/fa6";
+import { FaGithub, FaLinkedinIn } from "react-icons/fa6";
 import "./styles/SocialIcons.css";
 import { TbNotes } from "react-icons/tb";
 import { useEffect } from "react";
@@ -61,6 +61,15 @@ const SocialIcons = () => {
             rel="noreferrer"
           >
             <FaGithub />
+          </a>
+        </span>
+        <span>
+          <a
+            href="https://www.linkedin.com/in/dhruv-gupta-75a433272/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <FaLinkedinIn />
           </a>
         </span>
       </div>
