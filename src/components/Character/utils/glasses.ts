@@ -35,12 +35,16 @@ function cyl(a: THREE.Vector3, b: THREE.Vector3, r: number, mat: THREE.Material)
   return m;
 }
 
-function meshByName(character: THREE.Object3D, match: (n: string) => boolean) {
+function meshByName(
+  character: THREE.Object3D,
+  match: (n: string) => boolean
+): THREE.Mesh | null {
   let found: THREE.Mesh | null = null;
   character.traverse((o: any) => {
     if (!found && o.isMesh && o.name && match(o.name.toLowerCase())) found = o;
   });
-  return found;
+  // TS narrows `found` to null (assigned only in the callback); cast restores the type.
+  return found as THREE.Mesh | null;
 }
 
 function eyeCenter(character: THREE.Object3D): THREE.Vector3 | null {
