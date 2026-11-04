@@ -22,17 +22,6 @@ const Contact = () => {
 
         <div className="contact-cards">
           <div className="contact-card">
-            <h4>Connect</h4>
-            <p>
-              <a
-                href="https://www.linkedin.com/in/dhruv-gupta-75a433272/"
-                target="_blank"
-                rel="noreferrer"
-                data-cursor="disable"
-              >
-                LinkedIn — dhruv-gupta
-              </a>
-            </p>
             <h4>Education</h4>
             <p>
               B.Tech — Computer Science &amp; Engineering (AI Specialization),
@@ -51,15 +40,6 @@ const Contact = () => {
               className="contact-social"
             >
               GitHub <MdArrowOutward />
-            </a>
-            <a
-              href="https://www.linkedin.com/in/dhruv-gupta-75a433272/"
-              target="_blank"
-              rel="noreferrer"
-              data-cursor="disable"
-              className="contact-social"
-            >
-              LinkedIn <MdArrowOutward />
             </a>
           </div>
 
